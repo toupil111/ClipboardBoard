@@ -1,0 +1,30 @@
+name: ClipboardBoardMac
+options:
+  createIntermediateGroups: true
+  deploymentTarget:
+    macOS: '14.0'
+settings:
+  base:
+    SWIFT_VERSION: 6.0
+    MACOSX_DEPLOYMENT_TARGET: '14.0'
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: ''
+targets:
+  ClipboardBoardMac:
+    type: application
+    platform: macOS
+    deploymentTarget: '14.0'
+    sources:
+      - path: ../Sources/ClipboardBoard
+    info:
+      path: Mac-Info.plist
+    entitlements:
+      path: Mac.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.liangweibin.clipboardboard.mac
+        PRODUCT_NAME: ClipboardBoard
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_KEY_CFBundleDisplayName: ClipboardBoard
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_HARDENED_RUNTIME: YES

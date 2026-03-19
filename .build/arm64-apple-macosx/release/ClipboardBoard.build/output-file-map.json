@@ -1,0 +1,37 @@
+{
+  "": {
+    "dependencies": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardBoard.d",
+    "object": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardBoard.o",
+    "swift-dependencies": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/master.swiftdeps"
+  },
+  "/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/ClipboardBoardApp.swift": {
+    "object": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardBoardApp.swift.o",
+    "swiftmodule": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardBoardApp~partial.swiftmodule",
+    "swift-dependencies": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardBoardApp.swiftdeps",
+    "diagnostics": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardBoardApp.dia"
+  },
+  "/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/Models/ClipboardItem.swift": {
+    "object": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardItem.swift.o",
+    "swiftmodule": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardItem~partial.swiftmodule",
+    "swift-dependencies": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardItem.swiftdeps",
+    "diagnostics": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardItem.dia"
+  },
+  "/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/Services/AppServices.swift": {
+    "object": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/AppServices.swift.o",
+    "swiftmodule": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/AppServices~partial.swiftmodule",
+    "swift-dependencies": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/AppServices.swiftdeps",
+    "diagnostics": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/AppServices.dia"
+  },
+  "/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/Services/CloudKitSyncService.swift": {
+    "object": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/CloudKitSyncService.swift.o",
+    "swiftmodule": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/CloudKitSyncService~partial.swiftmodule",
+    "swift-dependencies": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/CloudKitSyncService.swiftdeps",
+    "diagnostics": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/CloudKitSyncService.dia"
+  },
+  "/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/Views/ClipboardPanelView.swift": {
+    "object": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardPanelView.swift.o",
+    "swiftmodule": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardPanelView~partial.swiftmodule",
+    "swift-dependencies": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardPanelView.swiftdeps",
+    "diagnostics": "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardPanelView.dia"
+  }
+}

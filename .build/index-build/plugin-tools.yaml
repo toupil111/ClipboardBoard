@@ -1,0 +1,47 @@
+client:
+  name: basic
+  file-system: device-agnostic
+tools: {}
+targets:
+  "ClipboardBoard-arm64-apple-macosx26.0-debug.module": ["<ClipboardBoard-arm64-apple-macosx26.0-debug.module>"]
+  "PackageStructure": ["<PackageStructure>"]
+  "main": ["<ClipboardBoard-arm64-apple-macosx26.0-debug.module>"]
+  "test": ["<ClipboardBoard-arm64-apple-macosx26.0-debug.module>"]
+default: "main"
+nodes:
+  "/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/":
+    is-directory-structure: true
+    content-exclusion-patterns: [".git",".build"]
+commands:
+  "/Users/liangweibin/project/粘贴板/.build/index-build/arm64-apple-macosx/debug/ClipboardBoard.build/sources":
+    tool: write-auxiliary-file
+    inputs: ["<sources-file-list>","/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/ClipboardBoardApp.swift","/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/Models/ClipboardItem.swift","/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/Services/AppServices.swift","/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/Services/CloudKitSyncService.swift","/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/Views/ClipboardPanelView.swift"]
+    outputs: ["/Users/liangweibin/project/粘贴板/.build/index-build/arm64-apple-macosx/debug/ClipboardBoard.build/sources"]
+    description: "Write auxiliary file /Users/liangweibin/project/粘贴板/.build/index-build/arm64-apple-macosx/debug/ClipboardBoard.build/sources"
+
+  "/Users/liangweibin/project/粘贴板/.build/index-build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt":
+    tool: write-auxiliary-file
+    inputs: ["<swift-get-version>","/Library/Developer/CommandLineTools/usr/bin/swiftc"]
+    outputs: ["/Users/liangweibin/project/粘贴板/.build/index-build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt"]
+    always-out-of-date: "true"
+    description: "Write auxiliary file /Users/liangweibin/project/粘贴板/.build/index-build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt"
+
+  "<ClipboardBoard-arm64-apple-macosx26.0-debug.module>":
+    tool: phony
+    inputs: ["/Users/liangweibin/project/粘贴板/.build/index-build/arm64-apple-macosx/debug/Modules/ClipboardBoard.swiftmodule"]
+    outputs: ["<ClipboardBoard-arm64-apple-macosx26.0-debug.module>"]
+
+  "C.ClipboardBoard-arm64-apple-macosx26.0-debug.module":
+    tool: shell
+    inputs: ["/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/ClipboardBoardApp.swift","/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/Models/ClipboardItem.swift","/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/Services/AppServices.swift","/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/Services/CloudKitSyncService.swift","/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/Views/ClipboardPanelView.swift","/Users/liangweibin/project/粘贴板/.build/index-build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt","/Users/liangweibin/project/粘贴板/.build/index-build/arm64-apple-macosx/debug/ClipboardBoard.build/sources"]
+    outputs: ["/Users/liangweibin/project/粘贴板/.build/index-build/arm64-apple-macosx/debug/Modules/ClipboardBoard.swiftmodule"]
+    description: "Compiling Swift Module 'ClipboardBoard' (5 sources)"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/swiftc","-module-name","ClipboardBoard","-emit-dependencies","-emit-module","-emit-module-path","/Users/liangweibin/project/粘贴板/.build/index-build/arm64-apple-macosx/debug/Modules/ClipboardBoard.swiftmodule","-output-file-map","/Users/liangweibin/project/粘贴板/.build/index-build/arm64-apple-macosx/debug/ClipboardBoard.build/output-file-map.json","-incremental","@/Users/liangweibin/project/粘贴板/.build/index-build/arm64-apple-macosx/debug/ClipboardBoard.build/sources","-I","/Users/liangweibin/project/粘贴板/.build/index-build/arm64-apple-macosx/debug/Modules","-target","arm64-apple-macosx14.0","-incremental","-enable-batch-mode","-serialize-diagnostics","-Onone","-enable-testing","-j10","-DSWIFT_PACKAGE","-DDEBUG","-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE","-module-cache-path","/Users/liangweibin/project/粘贴板/.build/index-build/arm64-apple-macosx/debug/ModuleCache","-parseable-output","-Xfrontend","-entry-point-function-name","-Xfrontend","ClipboardBoard_main","-swift-version","6","-Xfrontend","-experimental-lazy-typecheck","-Xfrontend","-experimental-skip-all-function-bodies","-Xfrontend","-experimental-allow-module-with-compiler-errors","-Xfrontend","-empty-abi-descriptor","-I","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-L","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-plugin-path","/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing","-sdk","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-g","-Xcc","-isysroot","-Xcc","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-Xcc","-fPIC","-Xcc","-g","-package-name","粘贴板"]
+
+  "PackageStructure":
+    tool: package-structure-tool
+    inputs: ["/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/","/Users/liangweibin/project/粘贴板/Package.swift","/Users/liangweibin/project/粘贴板/Package.resolved"]
+    outputs: ["<PackageStructure>"]
+    description: "Planning build"
+    allow-missing-inputs: true
+

@@ -1,0 +1,66 @@
+client:
+  name: basic
+  file-system: device-agnostic
+tools: {}
+targets:
+  "ClipboardBoard-arm64-apple-macosx26.0-release.exe": ["<ClipboardBoard-arm64-apple-macosx26.0-release.exe>"]
+  "ClipboardBoard-arm64-apple-macosx26.0-release.module": ["<ClipboardBoard-arm64-apple-macosx26.0-release.module>"]
+  "PackageStructure": ["<PackageStructure>"]
+  "main": ["<ClipboardBoard-arm64-apple-macosx26.0-release.exe>","<ClipboardBoard-arm64-apple-macosx26.0-release.module>"]
+  "test": ["<ClipboardBoard-arm64-apple-macosx26.0-release.exe>","<ClipboardBoard-arm64-apple-macosx26.0-release.module>"]
+default: "main"
+nodes:
+  "/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/":
+    is-directory-structure: true
+    content-exclusion-patterns: [".git",".build"]
+commands:
+  "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/sources":
+    tool: write-auxiliary-file
+    inputs: ["<sources-file-list>","/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/ClipboardBoardApp.swift","/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/Models/ClipboardItem.swift","/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/Services/AppServices.swift","/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/Services/CloudKitSyncService.swift","/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/Views/ClipboardPanelView.swift"]
+    outputs: ["/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/sources"]
+    description: "Write auxiliary file /Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/sources"
+
+  "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.product/Objects.LinkFileList":
+    tool: write-auxiliary-file
+    inputs: ["<link-file-list>","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/AppServices.swift.o","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardBoardApp.swift.o","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardItem.swift.o","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardPanelView.swift.o","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/CloudKitSyncService.swift.o"]
+    outputs: ["/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.product/Objects.LinkFileList"]
+    description: "Write auxiliary file /Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.product/Objects.LinkFileList"
+
+  "/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/swift-version--58304C5D6DBC2206.txt":
+    tool: write-auxiliary-file
+    inputs: ["<swift-get-version>","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"]
+    outputs: ["/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/swift-version--58304C5D6DBC2206.txt"]
+    always-out-of-date: "true"
+    description: "Write auxiliary file /Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/swift-version--58304C5D6DBC2206.txt"
+
+  "<ClipboardBoard-arm64-apple-macosx26.0-release.exe>":
+    tool: phony
+    inputs: ["/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard"]
+    outputs: ["<ClipboardBoard-arm64-apple-macosx26.0-release.exe>"]
+
+  "<ClipboardBoard-arm64-apple-macosx26.0-release.module>":
+    tool: phony
+    inputs: ["/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardBoardApp.swift.o","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardItem.swift.o","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/AppServices.swift.o","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/CloudKitSyncService.swift.o","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardPanelView.swift.o","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/Modules/ClipboardBoard.swiftmodule"]
+    outputs: ["<ClipboardBoard-arm64-apple-macosx26.0-release.module>"]
+
+  "C.ClipboardBoard-arm64-apple-macosx26.0-release.exe":
+    tool: shell
+    inputs: ["/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/AppServices.swift.o","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardBoardApp.swift.o","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardItem.swift.o","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardPanelView.swift.o","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/CloudKitSyncService.swift.o","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.product/Objects.LinkFileList"]
+    outputs: ["/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard"]
+    description: "Linking ./.build/arm64-apple-macosx/release/ClipboardBoard"
+    args: ["/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc","-L","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release","-o","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard","-module-name","ClipboardBoard","-Xlinker","-no_warn_duplicate_libraries","-emit-executable","-Xlinker","-dead_strip","-Xlinker","-alias","-Xlinker","_ClipboardBoard_main","-Xlinker","_main","-Xlinker","-rpath","-Xlinker","@loader_path","@/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.product/Objects.LinkFileList","-Xlinker","-rpath","-Xlinker","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift-6.2/macosx","-target","arm64-apple-macosx14.0","-plugin-path","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks","-I","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-L","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-g"]
+
+  "C.ClipboardBoard-arm64-apple-macosx26.0-release.module":
+    tool: shell
+    inputs: ["/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/ClipboardBoardApp.swift","/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/Models/ClipboardItem.swift","/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/Services/AppServices.swift","/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/Services/CloudKitSyncService.swift","/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/Views/ClipboardPanelView.swift","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/swift-version--58304C5D6DBC2206.txt","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/sources"]
+    outputs: ["/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardBoardApp.swift.o","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardItem.swift.o","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/AppServices.swift.o","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/CloudKitSyncService.swift.o","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/ClipboardPanelView.swift.o","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/Modules/ClipboardBoard.swiftmodule"]
+    description: "Compiling Swift Module 'ClipboardBoard' (5 sources)"
+    args: ["/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc","-module-name","ClipboardBoard","-emit-dependencies","-emit-module","-emit-module-path","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/Modules/ClipboardBoard.swiftmodule","-output-file-map","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/output-file-map.json","-whole-module-optimization","-num-threads","10","-c","@/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ClipboardBoard.build/sources","-I","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/Modules","-target","arm64-apple-macosx14.0","-whole-module-optimization","-num-threads","10","-serialize-diagnostics","-O","-j10","-DSWIFT_PACKAGE","-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE","-module-cache-path","/Users/liangweibin/project/粘贴板/.build/arm64-apple-macosx/release/ModuleCache","-parseable-output","-Xfrontend","-entry-point-function-name","-Xfrontend","ClipboardBoard_main","-color-diagnostics","-swift-version","6","-plugin-path","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks","-I","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-L","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-g","-Xcc","-isysroot","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk","-Xcc","-F","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-Xcc","-F","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks","-Xcc","-fPIC","-Xcc","-g","-package-name","粘贴板"]
+
+  "PackageStructure":
+    tool: package-structure-tool
+    inputs: ["/Users/liangweibin/project/粘贴板/Sources/ClipboardBoard/","/Users/liangweibin/project/粘贴板/Package.swift","/Users/liangweibin/project/粘贴板/Package.resolved"]
+    outputs: ["<PackageStructure>"]
+    description: "Planning build"
+    allow-missing-inputs: true
+

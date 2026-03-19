@@ -1,0 +1,28 @@
+name: ClipboardMobileFree
+options:
+  createIntermediateGroups: true
+  deploymentTarget:
+    iOS: '18.0'
+settings:
+  base:
+    SWIFT_VERSION: 6.0
+    IPHONEOS_DEPLOYMENT_TARGET: '18.0'
+    TARGETED_DEVICE_FAMILY: '1,2'
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: ''
+targets:
+  ClipboardMobileFree:
+    type: application
+    platform: iOS
+    deploymentTarget: '18.0'
+    sources:
+      - path: ../iOSApp
+      - path: ../Shared
+    info:
+      path: App-Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.liangweibin.clipboardmobile.free
+        PRODUCT_NAME: ClipboardMobileFree
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_KEY_CFBundleDisplayName: ClipboardMobileFree
