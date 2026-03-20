@@ -31,12 +31,14 @@ final class ClipboardPersistenceController {
     private let directoryURL: URL
     private let payloadsURL: URL
     private let historyURL: URL
+    private let customTagsURL: URL
 
     init() {
         let applicationSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         directoryURL = applicationSupport.appendingPathComponent("ClipboardBoard", isDirectory: true)
         payloadsURL = directoryURL.appendingPathComponent("Payloads", isDirectory: true)
         historyURL = directoryURL.appendingPathComponent("history.json", isDirectory: false)
+        customTagsURL = directoryURL.appendingPathComponent("custom-tags.json", isDirectory: false)
 
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         decoder.dateDecodingStrategy = .iso8601
@@ -70,6 +72,26 @@ final class ClipboardPersistenceController {
         return capture.item.withPayloadFileName(fileName)
     }
 
+    func loadCustomTags() -> [String] {
+        ensureDirectories()
+
+        guard let data = try? Data(contentsOf: customTagsURL),
+              let tags = try? decoder.decode([String].self, from: data) else {
+            return []
+        }
+
+        return normalizedTags(tags)
+    }
+
+    func saveCustomTags(_ tags: [String]) {
+        ensureDirectories()
+        guard let data = try? encoder.encode(normalizedTags(tags)) else {
+            return
+        }
+
+        try? data.write(to: customTagsURL, options: [.atomic])
+    }
+
     func payloadData(for fileName: String) -> Data? {
         let targetURL = payloadsURL.appendingPathComponent(fileName, isDirectory: false)
         return try? Data(contentsOf: targetURL, options: [.mappedIfSafe])
@@ -100,11 +122,16 @@ final class ClipboardPersistenceController {
             try? fileManager.removeItem(at: fileURL)
         }
     }
+
+    private func normalizedTags(_ tags: [String]) -> [String] {
+        Array(Set(tags.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty })).sorted()
+    }
 }
 
 @MainActor
 final class ClipboardStore: ObservableObject {
     @Published private(set) var items: [ClipboardItem]
+    @Published private(set) var customTags: [String]
 
     var onItemsChanged: (([ClipboardItem]) -> Void)?
     var onCopyCaptured: ((ClipboardItem) -> Void)?
@@ -115,6 +142,7 @@ final class ClipboardStore: ObservableObject {
     init(persistence: ClipboardPersistenceController = .shared) {
         self.persistence = persistence
         self.items = persistence.loadItems(limit: maximumItems)
+        self.customTags = persistence.loadCustomTags()
     }
 
     func captureCurrentPasteboard(notifyFeedback: Bool = true) {
@@ -131,6 +159,86 @@ final class ClipboardStore: ObservableObject {
         moveToFront(item)
     }
 
+    func toggleFavorite(_ item: ClipboardItem) {
+        setFavorite(item, isFavorite: !item.isFavorite)
+    }
+
+    func setFavorite(_ item: ClipboardItem, isFavorite: Bool) {
+        guard let index = items.firstIndex(where: { $0.id == item.id }) else {
+            return
+        }
+
+        items[index] = items[index].withFavorite(isFavorite)
+        persistAndNotifyChanges()
+    }
+
+    func togglePin(_ item: ClipboardItem) {
+        guard let index = items.firstIndex(where: { $0.id == item.id }) else {
+            return
+        }
+
+        let shouldPin = !items[index].isPinned
+        items = items.map { current in
+            if current.id == item.id {
+                return current.withPinned(shouldPin)
+            }
+            return current.isPinned ? current.withPinned(false) : current
+        }
+
+        if shouldPin, let pinnedItem = items.first(where: { $0.id == item.id }) {
+            moveToFront(pinnedItem, persist: false)
+        }
+
+        persistAndNotifyChanges()
+    }
+
+    func deleteItem(_ item: ClipboardItem) {
+        items.removeAll { $0.id == item.id }
+        persistAndNotifyChanges()
+    }
+
+    @discardableResult
+    func createCustomTag(_ name: String) -> String? {
+        let normalized = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalized.isEmpty else {
+            return nil
+        }
+
+        if !customTags.contains(normalized) {
+            customTags.append(normalized)
+            customTags.sort()
+            persistence.saveCustomTags(customTags)
+        }
+        return normalized
+    }
+
+    func updateCustomTags(_ tags: [String], for item: ClipboardItem, markFavorite: Bool = true) {
+        guard let index = items.firstIndex(where: { $0.id == item.id }) else {
+            return
+        }
+
+        let normalizedTags = tags.compactMap { createCustomTag($0) }
+        items[index] = items[index].withCustomTags(normalizedTags, markFavorite: markFavorite || !normalizedTags.isEmpty)
+        persistAndNotifyChanges()
+    }
+
+    func assignTag(_ tag: String, to item: ClipboardItem) {
+        guard let index = items.firstIndex(where: { $0.id == item.id }) else {
+            return
+        }
+
+        guard let normalized = createCustomTag(tag) else {
+            return
+        }
+
+        var tags = items[index].customTags
+        if !tags.contains(normalized) {
+            tags.append(normalized)
+        }
+        items[index] = items[index].withCustomTags(tags, markFavorite: true)
+        persistAndNotifyChanges()
+    }
+
     private func append(_ capture: ClipboardCapture, notifyFeedback: Bool) {
         let item = persistence.prepare(capture)
         guard items.first?.fingerprint != item.fingerprint else {
@@ -144,17 +252,23 @@ final class ClipboardStore: ObservableObject {
             items = Array(items.prefix(maximumItems))
         }
 
-        persistence.save(items: items)
-        onItemsChanged?(items)
+        persistAndNotifyChanges()
         if notifyFeedback {
             onCopyCaptured?(item)
         }
     }
 
-    private func moveToFront(_ item: ClipboardItem) {
+    private func moveToFront(_ item: ClipboardItem, persist: Bool = true) {
         items.removeAll { $0.id == item.id }
         items.insert(item, at: 0)
+        if persist {
+            persistAndNotifyChanges()
+        }
+    }
+
+    private func persistAndNotifyChanges() {
         persistence.save(items: items)
+        persistence.saveCustomTags(customTags)
         onItemsChanged?(items)
     }
 }
@@ -548,6 +662,7 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
         panel.isFloatingPanel = true
         panel.level = .statusBar
         panel.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
+        panel.hidesOnDeactivate = false
         panel.titleVisibility = .hidden
         panel.titlebarAppearsTransparent = true
         panel.isMovableByWindowBackground = true
@@ -591,10 +706,6 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
                 self?.isVisible = false
             }
         }
-    }
-
-    func windowDidResignKey(_ notification: Notification) {
-        hide()
     }
 
     private func preferredFrame() -> NSRect {

@@ -53,12 +53,39 @@ enum ClipboardContentKind: String, Codable {
     }
 }
 
+enum ClipboardDetectedLabel: String, Codable {
+    case email
+    case phone
+    case account
+
+    var title: String {
+        switch self {
+        case .email:
+            return "邮箱"
+        case .phone:
+            return "手机号"
+        case .account:
+            return "账号"
+        }
+    }
+
+    var symbolName: String {
+        switch self {
+        case .email:
+            return "envelope"
+        case .phone:
+            return "phone"
+        case .account:
+            return "person.crop.circle"
+        }
+    }
+}
+
 struct ClipboardCapture {
     let item: ClipboardItem
     let payloadData: Data?
 }
 
-@MainActor
 struct ClipboardItem: Identifiable, Equatable, Codable {
     let id: UUID
     let timestamp: Date
@@ -71,9 +98,14 @@ struct ClipboardItem: Identifiable, Equatable, Codable {
     let fileURLs: [URL]
     let payloadFileName: String?
     let fingerprint: String
+    let isFavorite: Bool
+    let isPinned: Bool
+    let customTags: [String]
 
-    private static let previewCache = NSCache<NSString, NSImage>()
-    private static let fileIconCache = NSCache<NSString, NSImage>()
+    @MainActor private static let previewCache = NSCache<NSString, NSImage>()
+    @MainActor private static let fileIconCache = NSCache<NSString, NSImage>()
+    private static let emailPattern = try! NSRegularExpression(pattern: #"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}"#, options: [.caseInsensitive])
+    private static let phonePattern = try! NSRegularExpression(pattern: #"(?<!\d)(?:\+?86[- ]?)?1[3-9]\d{9}(?!\d)"#, options: [])
 
     init(
         id: UUID = UUID(),
@@ -86,7 +118,10 @@ struct ClipboardItem: Identifiable, Equatable, Codable {
         pasteboardTypeIdentifier: String?,
         fileURLs: [URL],
         payloadFileName: String?,
-        fingerprint: String
+        fingerprint: String,
+        isFavorite: Bool = false,
+        isPinned: Bool = false,
+        customTags: [String] = []
     ) {
         self.id = id
         self.timestamp = timestamp
@@ -99,8 +134,65 @@ struct ClipboardItem: Identifiable, Equatable, Codable {
         self.fileURLs = fileURLs
         self.payloadFileName = payloadFileName
         self.fingerprint = fingerprint
+        self.isFavorite = isFavorite
+        self.isPinned = isPinned
+        self.customTags = Array(Set(customTags.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty })).sorted()
     }
 
+    enum CodingKeys: String, CodingKey {
+        case id
+        case timestamp
+        case title
+        case subtitle
+        case contentKind
+        case previewText
+        case previewImageData
+        case pasteboardTypeIdentifier
+        case fileURLs
+        case payloadFileName
+        case fingerprint
+        case isFavorite
+        case isPinned
+        case customTags
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        timestamp = try container.decode(Date.self, forKey: .timestamp)
+        title = try container.decode(String.self, forKey: .title)
+        subtitle = try container.decode(String.self, forKey: .subtitle)
+        contentKind = try container.decode(ClipboardContentKind.self, forKey: .contentKind)
+        previewText = try container.decodeIfPresent(String.self, forKey: .previewText)
+        previewImageData = try container.decodeIfPresent(Data.self, forKey: .previewImageData)
+        pasteboardTypeIdentifier = try container.decodeIfPresent(String.self, forKey: .pasteboardTypeIdentifier)
+        fileURLs = try container.decodeIfPresent([URL].self, forKey: .fileURLs) ?? []
+        payloadFileName = try container.decodeIfPresent(String.self, forKey: .payloadFileName)
+        fingerprint = try container.decode(String.self, forKey: .fingerprint)
+        isFavorite = try container.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
+        isPinned = try container.decodeIfPresent(Bool.self, forKey: .isPinned) ?? false
+        customTags = try container.decodeIfPresent([String].self, forKey: .customTags) ?? []
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(timestamp, forKey: .timestamp)
+        try container.encode(title, forKey: .title)
+        try container.encode(subtitle, forKey: .subtitle)
+        try container.encode(contentKind, forKey: .contentKind)
+        try container.encodeIfPresent(previewText, forKey: .previewText)
+        try container.encodeIfPresent(previewImageData, forKey: .previewImageData)
+        try container.encodeIfPresent(pasteboardTypeIdentifier, forKey: .pasteboardTypeIdentifier)
+        try container.encode(fileURLs, forKey: .fileURLs)
+        try container.encodeIfPresent(payloadFileName, forKey: .payloadFileName)
+        try container.encode(fingerprint, forKey: .fingerprint)
+        try container.encode(isFavorite, forKey: .isFavorite)
+        try container.encode(isPinned, forKey: .isPinned)
+        try container.encode(customTags, forKey: .customTags)
+    }
+
+    @MainActor
     static func capture(from pasteboard: NSPasteboard) -> ClipboardCapture? {
         if let urls = pasteboard.readObjects(
             forClasses: [NSURL.self],
@@ -189,10 +281,107 @@ struct ClipboardItem: Identifiable, Equatable, Codable {
             pasteboardTypeIdentifier: pasteboardTypeIdentifier,
             fileURLs: fileURLs,
             payloadFileName: payloadFileName,
-            fingerprint: fingerprint
+            fingerprint: fingerprint,
+            isFavorite: isFavorite,
+            isPinned: isPinned,
+            customTags: customTags
         )
     }
 
+    func withFavorite(_ isFavorite: Bool) -> ClipboardItem {
+        ClipboardItem(
+            id: id,
+            timestamp: timestamp,
+            title: title,
+            subtitle: subtitle,
+            contentKind: contentKind,
+            previewText: previewText,
+            previewImageData: previewImageData,
+            pasteboardTypeIdentifier: pasteboardTypeIdentifier,
+            fileURLs: fileURLs,
+            payloadFileName: payloadFileName,
+            fingerprint: fingerprint,
+            isFavorite: isFavorite,
+            isPinned: isPinned,
+            customTags: customTags
+        )
+    }
+
+    func withPinned(_ isPinned: Bool) -> ClipboardItem {
+        ClipboardItem(
+            id: id,
+            timestamp: timestamp,
+            title: title,
+            subtitle: subtitle,
+            contentKind: contentKind,
+            previewText: previewText,
+            previewImageData: previewImageData,
+            pasteboardTypeIdentifier: pasteboardTypeIdentifier,
+            fileURLs: fileURLs,
+            payloadFileName: payloadFileName,
+            fingerprint: fingerprint,
+            isFavorite: isFavorite,
+            isPinned: isPinned,
+            customTags: customTags
+        )
+    }
+
+    func withCustomTags(_ customTags: [String], markFavorite: Bool? = nil) -> ClipboardItem {
+        ClipboardItem(
+            id: id,
+            timestamp: timestamp,
+            title: title,
+            subtitle: subtitle,
+            contentKind: contentKind,
+            previewText: previewText,
+            previewImageData: previewImageData,
+            pasteboardTypeIdentifier: pasteboardTypeIdentifier,
+            fileURLs: fileURLs,
+            payloadFileName: payloadFileName,
+            fingerprint: fingerprint,
+            isFavorite: markFavorite ?? isFavorite,
+            isPinned: isPinned,
+            customTags: customTags
+        )
+    }
+
+    var displayTags: [String] {
+        var tags = customTags
+        if let quickTagTitle, !tags.contains(quickTagTitle) {
+            tags.insert(quickTagTitle, at: 0)
+        }
+        return tags
+    }
+
+    var detectedLabel: ClipboardDetectedLabel? {
+        guard contentKind == .text || contentKind == .doc else {
+            return nil
+        }
+
+        let source = [title, previewText ?? ""].joined(separator: "\n")
+        let sourceRange = NSRange(source.startIndex..<source.endIndex, in: source)
+
+        if Self.emailPattern.firstMatch(in: source, range: sourceRange) != nil {
+            return .email
+        }
+
+        if Self.phonePattern.firstMatch(in: source, range: sourceRange) != nil {
+            return .phone
+        }
+
+        let normalized = source.lowercased()
+        if normalized.contains("账号") || normalized.contains("account") || normalized.contains("login") || normalized.contains("user") || normalized.contains("用户名") || normalized.contains("id:") {
+            return .account
+        }
+
+        return nil
+    }
+
+    var quickTagTitle: String? {
+        detectedLabel?.title
+    }
+
+    @MainActor
     func restore(to pasteboard: NSPasteboard, payloadDataProvider: (String) -> Data?) {
         pasteboard.clearContents()
 
@@ -228,6 +417,7 @@ struct ClipboardItem: Identifiable, Equatable, Codable {
         }
     }
 
+    @MainActor
     func previewImage() -> NSImage? {
         if let cached = Self.previewCache.object(forKey: fingerprint as NSString) {
             return cached
@@ -261,6 +451,7 @@ struct ClipboardItem: Identifiable, Equatable, Codable {
         return nil
     }
 
+    @MainActor
     private static func makeFileItem(_ urls: [URL]) -> ClipboardCapture {
         let kind = inferKind(from: urls)
         let title = urls.count == 1 ? urls[0].lastPathComponent : "\(urls.count) 个文件"
@@ -342,6 +533,7 @@ struct ClipboardItem: Identifiable, Equatable, Codable {
         return .file
     }
 
+    @MainActor
     private static func thumbnailData(for image: NSImage, maxDimension: CGFloat = 240) -> Data? {
         let maxSourceDimension = max(image.size.width, image.size.height)
         let scale = min(1, maxDimension / maxSourceDimension)
