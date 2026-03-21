@@ -1,0 +1,12 @@
+.DS_Store
+**/.DS_Store
+
+.build/
+.swiftpm/
+
+dist/ClipboardBoard.app/
+dist/ClipboardBoard.dmg
+dist/dmg-root/
+
+*.swp
+*.swo

@@ -100,6 +100,12 @@ struct ClipboardItem: Identifiable, Equatable, Codable {
     let fingerprint: String
     let isFavorite: Bool
     let isPinned: Bool
+    let isSensitive: Bool
+    let secondaryEncryptedPreviewText: Data?
+    let sensitiveRevealTimeoutSeconds: Int?
+    let blocksAutoPaste: Bool
+    let estimatedSizeBytes: Int64
+    let duplicateCount: Int
     let customTags: [String]
 
     @MainActor private static let previewCache = NSCache<NSString, NSImage>()
@@ -121,6 +127,12 @@ struct ClipboardItem: Identifiable, Equatable, Codable {
         fingerprint: String,
         isFavorite: Bool = false,
         isPinned: Bool = false,
+        isSensitive: Bool = false,
+        secondaryEncryptedPreviewText: Data? = nil,
+        sensitiveRevealTimeoutSeconds: Int? = nil,
+        blocksAutoPaste: Bool = false,
+        estimatedSizeBytes: Int64 = 0,
+        duplicateCount: Int = 1,
         customTags: [String] = []
     ) {
         self.id = id
@@ -136,6 +148,12 @@ struct ClipboardItem: Identifiable, Equatable, Codable {
         self.fingerprint = fingerprint
         self.isFavorite = isFavorite
         self.isPinned = isPinned
+        self.isSensitive = isSensitive
+        self.secondaryEncryptedPreviewText = secondaryEncryptedPreviewText
+        self.sensitiveRevealTimeoutSeconds = sensitiveRevealTimeoutSeconds
+        self.blocksAutoPaste = blocksAutoPaste
+        self.estimatedSizeBytes = estimatedSizeBytes
+        self.duplicateCount = max(duplicateCount, 1)
         self.customTags = Array(Set(customTags.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty })).sorted()
     }
 
@@ -153,6 +171,12 @@ struct ClipboardItem: Identifiable, Equatable, Codable {
         case fingerprint
         case isFavorite
         case isPinned
+        case isSensitive
+        case secondaryEncryptedPreviewText
+        case sensitiveRevealTimeoutSeconds
+        case blocksAutoPaste
+        case estimatedSizeBytes
+        case duplicateCount
         case customTags
     }
 
@@ -171,6 +195,12 @@ struct ClipboardItem: Identifiable, Equatable, Codable {
         fingerprint = try container.decode(String.self, forKey: .fingerprint)
         isFavorite = try container.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
         isPinned = try container.decodeIfPresent(Bool.self, forKey: .isPinned) ?? false
+        isSensitive = try container.decodeIfPresent(Bool.self, forKey: .isSensitive) ?? false
+        secondaryEncryptedPreviewText = try container.decodeIfPresent(Data.self, forKey: .secondaryEncryptedPreviewText)
+        sensitiveRevealTimeoutSeconds = try container.decodeIfPresent(Int.self, forKey: .sensitiveRevealTimeoutSeconds)
+        blocksAutoPaste = try container.decodeIfPresent(Bool.self, forKey: .blocksAutoPaste) ?? false
+        estimatedSizeBytes = try container.decodeIfPresent(Int64.self, forKey: .estimatedSizeBytes) ?? 0
+        duplicateCount = try container.decodeIfPresent(Int.self, forKey: .duplicateCount) ?? 1
         customTags = try container.decodeIfPresent([String].self, forKey: .customTags) ?? []
     }
 
@@ -189,6 +219,12 @@ struct ClipboardItem: Identifiable, Equatable, Codable {
         try container.encode(fingerprint, forKey: .fingerprint)
         try container.encode(isFavorite, forKey: .isFavorite)
         try container.encode(isPinned, forKey: .isPinned)
+        try container.encode(isSensitive, forKey: .isSensitive)
+        try container.encodeIfPresent(secondaryEncryptedPreviewText, forKey: .secondaryEncryptedPreviewText)
+        try container.encodeIfPresent(sensitiveRevealTimeoutSeconds, forKey: .sensitiveRevealTimeoutSeconds)
+        try container.encode(blocksAutoPaste, forKey: .blocksAutoPaste)
+        try container.encode(estimatedSizeBytes, forKey: .estimatedSizeBytes)
+        try container.encode(duplicateCount, forKey: .duplicateCount)
         try container.encode(customTags, forKey: .customTags)
     }
 
@@ -212,7 +248,8 @@ struct ClipboardItem: Identifiable, Equatable, Codable {
                 pasteboardTypeIdentifier: NSPasteboard.PasteboardType.string.rawValue,
                 fileURLs: [],
                 payloadFileName: nil,
-                fingerprint: Self.sha256(text)
+                fingerprint: Self.sha256(text),
+                estimatedSizeBytes: Int64(Data(text.utf8).count)
             )
             return ClipboardCapture(item: item, payloadData: nil)
         }
@@ -229,7 +266,8 @@ struct ClipboardItem: Identifiable, Equatable, Codable {
                 pasteboardTypeIdentifier: NSPasteboard.PasteboardType.tiff.rawValue,
                 fileURLs: [],
                 payloadFileName: nil,
-                fingerprint: Self.sha256(data)
+                fingerprint: Self.sha256(data),
+                estimatedSizeBytes: Int64(data.count)
             )
             return ClipboardCapture(item: item, payloadData: data)
         }
@@ -244,7 +282,8 @@ struct ClipboardItem: Identifiable, Equatable, Codable {
                 pasteboardTypeIdentifier: NSPasteboard.PasteboardType.pdf.rawValue,
                 fileURLs: [],
                 payloadFileName: nil,
-                fingerprint: Self.sha256(pdfData)
+                fingerprint: Self.sha256(pdfData),
+                estimatedSizeBytes: Int64(pdfData.count)
             )
             return ClipboardCapture(item: item, payloadData: pdfData)
         }
@@ -260,7 +299,8 @@ struct ClipboardItem: Identifiable, Equatable, Codable {
                     pasteboardTypeIdentifier: type.rawValue,
                     fileURLs: [],
                     payloadFileName: nil,
-                    fingerprint: Self.sha256(data)
+                    fingerprint: Self.sha256(data),
+                    estimatedSizeBytes: Int64(data.count)
                 )
                 return ClipboardCapture(item: item, payloadData: data)
             }
@@ -284,6 +324,12 @@ struct ClipboardItem: Identifiable, Equatable, Codable {
             fingerprint: fingerprint,
             isFavorite: isFavorite,
             isPinned: isPinned,
+            isSensitive: isSensitive,
+            secondaryEncryptedPreviewText: secondaryEncryptedPreviewText,
+            sensitiveRevealTimeoutSeconds: sensitiveRevealTimeoutSeconds,
+            blocksAutoPaste: blocksAutoPaste,
+            estimatedSizeBytes: estimatedSizeBytes,
+            duplicateCount: duplicateCount,
             customTags: customTags
         )
     }
@@ -303,6 +349,12 @@ struct ClipboardItem: Identifiable, Equatable, Codable {
             fingerprint: fingerprint,
             isFavorite: isFavorite,
             isPinned: isPinned,
+            isSensitive: isSensitive,
+            secondaryEncryptedPreviewText: secondaryEncryptedPreviewText,
+            sensitiveRevealTimeoutSeconds: sensitiveRevealTimeoutSeconds,
+            blocksAutoPaste: blocksAutoPaste,
+            estimatedSizeBytes: estimatedSizeBytes,
+            duplicateCount: duplicateCount,
             customTags: customTags
         )
     }
@@ -322,7 +374,163 @@ struct ClipboardItem: Identifiable, Equatable, Codable {
             fingerprint: fingerprint,
             isFavorite: isFavorite,
             isPinned: isPinned,
+            isSensitive: isSensitive,
+            secondaryEncryptedPreviewText: secondaryEncryptedPreviewText,
+            sensitiveRevealTimeoutSeconds: sensitiveRevealTimeoutSeconds,
+            blocksAutoPaste: blocksAutoPaste,
+            estimatedSizeBytes: estimatedSizeBytes,
+            duplicateCount: duplicateCount,
             customTags: customTags
+        )
+    }
+
+    func withSensitive(_ isSensitive: Bool) -> ClipboardItem {
+        ClipboardItem(
+            id: id,
+            timestamp: timestamp,
+            title: title,
+            subtitle: subtitle,
+            contentKind: contentKind,
+            previewText: previewText,
+            previewImageData: previewImageData,
+            pasteboardTypeIdentifier: pasteboardTypeIdentifier,
+            fileURLs: fileURLs,
+            payloadFileName: payloadFileName,
+            fingerprint: fingerprint,
+            isFavorite: isFavorite,
+            isPinned: isPinned,
+            isSensitive: isSensitive,
+            secondaryEncryptedPreviewText: isSensitive ? secondaryEncryptedPreviewText : nil,
+            sensitiveRevealTimeoutSeconds: isSensitive ? sensitiveRevealTimeoutSeconds : nil,
+            blocksAutoPaste: false,
+            estimatedSizeBytes: estimatedSizeBytes,
+            duplicateCount: duplicateCount,
+            customTags: customTags
+        )
+    }
+
+    func withSensitiveTimeout(_ timeout: Int?) -> ClipboardItem {
+        ClipboardItem(
+            id: id,
+            timestamp: timestamp,
+            title: title,
+            subtitle: subtitle,
+            contentKind: contentKind,
+            previewText: previewText,
+            previewImageData: previewImageData,
+            pasteboardTypeIdentifier: pasteboardTypeIdentifier,
+            fileURLs: fileURLs,
+            payloadFileName: payloadFileName,
+            fingerprint: fingerprint,
+            isFavorite: isFavorite,
+            isPinned: isPinned,
+            isSensitive: isSensitive,
+            secondaryEncryptedPreviewText: secondaryEncryptedPreviewText,
+            sensitiveRevealTimeoutSeconds: timeout,
+            blocksAutoPaste: blocksAutoPaste,
+            estimatedSizeBytes: estimatedSizeBytes,
+            duplicateCount: duplicateCount,
+            customTags: customTags
+        )
+    }
+
+    func withResolvedPreviewText(_ previewText: String?) -> ClipboardItem {
+        ClipboardItem(
+            id: id,
+            timestamp: timestamp,
+            title: title,
+            subtitle: subtitle,
+            contentKind: contentKind,
+            previewText: previewText,
+            previewImageData: previewImageData,
+            pasteboardTypeIdentifier: pasteboardTypeIdentifier,
+            fileURLs: fileURLs,
+            payloadFileName: payloadFileName,
+            fingerprint: fingerprint,
+            isFavorite: isFavorite,
+            isPinned: isPinned,
+            isSensitive: isSensitive,
+            secondaryEncryptedPreviewText: secondaryEncryptedPreviewText,
+            sensitiveRevealTimeoutSeconds: sensitiveRevealTimeoutSeconds,
+            blocksAutoPaste: blocksAutoPaste,
+            estimatedSizeBytes: estimatedSizeBytes,
+            duplicateCount: duplicateCount,
+            customTags: customTags
+        )
+    }
+
+    func withSecondaryEncryptedPreviewText(_ encryptedData: Data?, previewText: String?) -> ClipboardItem {
+        ClipboardItem(
+            id: id,
+            timestamp: timestamp,
+            title: title,
+            subtitle: subtitle,
+            contentKind: contentKind,
+            previewText: previewText,
+            previewImageData: previewImageData,
+            pasteboardTypeIdentifier: pasteboardTypeIdentifier,
+            fileURLs: fileURLs,
+            payloadFileName: payloadFileName,
+            fingerprint: fingerprint,
+            isFavorite: isFavorite,
+            isPinned: isPinned,
+            isSensitive: isSensitive,
+            secondaryEncryptedPreviewText: encryptedData,
+            sensitiveRevealTimeoutSeconds: sensitiveRevealTimeoutSeconds,
+            blocksAutoPaste: blocksAutoPaste,
+            estimatedSizeBytes: estimatedSizeBytes,
+            duplicateCount: duplicateCount,
+            customTags: customTags
+        )
+    }
+
+    func withDuplicateCount(_ duplicateCount: Int) -> ClipboardItem {
+        ClipboardItem(
+            id: id,
+            timestamp: timestamp,
+            title: title,
+            subtitle: subtitle,
+            contentKind: contentKind,
+            previewText: previewText,
+            previewImageData: previewImageData,
+            pasteboardTypeIdentifier: pasteboardTypeIdentifier,
+            fileURLs: fileURLs,
+            payloadFileName: payloadFileName,
+            fingerprint: fingerprint,
+            isFavorite: isFavorite,
+            isPinned: isPinned,
+            isSensitive: isSensitive,
+            secondaryEncryptedPreviewText: secondaryEncryptedPreviewText,
+            sensitiveRevealTimeoutSeconds: sensitiveRevealTimeoutSeconds,
+            blocksAutoPaste: blocksAutoPaste,
+            estimatedSizeBytes: estimatedSizeBytes,
+            duplicateCount: duplicateCount,
+            customTags: customTags
+        )
+    }
+
+    func mergingDuplicateMetadata(from existing: ClipboardItem) -> ClipboardItem {
+        ClipboardItem(
+            id: existing.id,
+            timestamp: timestamp,
+            title: title,
+            subtitle: subtitle,
+            contentKind: contentKind,
+            previewText: previewText,
+            previewImageData: previewImageData,
+            pasteboardTypeIdentifier: pasteboardTypeIdentifier,
+            fileURLs: fileURLs,
+            payloadFileName: payloadFileName,
+            fingerprint: fingerprint,
+            isFavorite: existing.isFavorite,
+            isPinned: existing.isPinned,
+            isSensitive: existing.isSensitive,
+            secondaryEncryptedPreviewText: existing.secondaryEncryptedPreviewText,
+            sensitiveRevealTimeoutSeconds: existing.sensitiveRevealTimeoutSeconds,
+            blocksAutoPaste: existing.blocksAutoPaste,
+            estimatedSizeBytes: estimatedSizeBytes,
+            duplicateCount: existing.duplicateCount + 1,
+            customTags: existing.customTags
         )
     }
 
@@ -341,16 +549,87 @@ struct ClipboardItem: Identifiable, Equatable, Codable {
             fingerprint: fingerprint,
             isFavorite: markFavorite ?? isFavorite,
             isPinned: isPinned,
+            isSensitive: isSensitive,
+            secondaryEncryptedPreviewText: secondaryEncryptedPreviewText,
+            sensitiveRevealTimeoutSeconds: sensitiveRevealTimeoutSeconds,
+            blocksAutoPaste: blocksAutoPaste,
+            estimatedSizeBytes: estimatedSizeBytes,
             customTags: customTags
         )
     }
 
     var displayTags: [String] {
         var tags = customTags
+        if isSensitive, !tags.contains("敏感") {
+            tags.insert("敏感", at: 0)
+        }
         if let quickTagTitle, !tags.contains(quickTagTitle) {
             tags.insert(quickTagTitle, at: 0)
         }
         return tags
+    }
+
+    var protectedPreviewText: String? {
+        guard isSensitive else {
+            return previewText
+        }
+
+        let count = max((previewText ?? title).count, 8)
+        return String(repeating: "•", count: min(count, 24))
+    }
+
+    func partiallyRevealedPreviewText(visibleCount preferredVisibleCount: Int) -> String? {
+        guard isSensitive else {
+            return previewText
+        }
+
+        let source = previewText ?? title
+        guard !source.isEmpty else {
+            return nil
+        }
+
+        let visibleCount = min(max(preferredVisibleCount, 1), source.count)
+        let prefixText = String(source.prefix(visibleCount))
+        let maskedCount = min(max(source.count - visibleCount, 4), 20)
+        return prefixText + String(repeating: "•", count: maskedCount)
+    }
+
+    var hasCustomSensitiveTimeout: Bool {
+        sensitiveRevealTimeoutSeconds != nil
+    }
+
+    var duplicateBadgeTitle: String? {
+        duplicateCount > 1 ? "合并 \(duplicateCount) 次" : nil
+    }
+
+    func isLargeAttachment(thresholdMB: Int) -> Bool {
+        estimatedSizeBytes >= Int64(max(thresholdMB, 1)) * 1_048_576
+    }
+
+    func isSemanticallySimilar(to other: ClipboardItem) -> Bool {
+        guard contentKind == other.contentKind else {
+            return false
+        }
+
+        switch contentKind {
+        case .text, .doc:
+            return normalizedSearchBody == other.normalizedSearchBody
+        case .image, .pdf:
+            return fingerprint == other.fingerprint
+        case .audio, .video, .file, .files:
+            if !fileURLs.isEmpty || !other.fileURLs.isEmpty {
+                return fileURLs.map(\.path).sorted() == other.fileURLs.map(\.path).sorted()
+            }
+            return fingerprint == other.fingerprint || (title == other.title && estimatedSizeBytes == other.estimatedSizeBytes)
+        }
+    }
+
+    private var normalizedSearchBody: String {
+        [title, subtitle, previewText ?? "", fileURLs.map(\.lastPathComponent).joined(separator: " ")]
+            .joined(separator: " ")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
+            .lowercased()
     }
 
     var detectedLabel: ClipboardDetectedLabel? {
@@ -485,7 +764,11 @@ struct ClipboardItem: Identifiable, Equatable, Codable {
             pasteboardTypeIdentifier: nil,
             fileURLs: urls,
             payloadFileName: nil,
-            fingerprint: sha256(fingerprintSource)
+            fingerprint: sha256(fingerprintSource),
+            estimatedSizeBytes: urls.reduce(into: Int64(0)) { partialResult, url in
+                let resource = try? url.resourceValues(forKeys: [.fileSizeKey])
+                partialResult += Int64(resource?.fileSize ?? 0)
+            }
         )
         return ClipboardCapture(item: item, payloadData: nil)
     }
