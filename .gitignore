@@ -4,6 +4,7 @@
 .build/
 .swiftpm/
 
+dist/
 dist/ClipboardBoard.app/
 dist/ClipboardBoard.dmg
 dist/dmg-root/
