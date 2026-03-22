@@ -29,7 +29,11 @@ ClipboardBoard 是一个使用 Swift 开发的 macOS 剪贴板工具，用来快
 - 支持通过勾选启用自动清理旧备份策略
 - 支持一键打开本地数据目录、备份目录与附件目录
 - 支持明亮 / 暗黑 / 跟随系统主题、面板尺寸、列表密度与强调色设置
+- 亮色模式使用更干净的纯白背景，顶部区域不再透明
 - 设置主弹窗与二级弹窗会随面板尺寸和紧凑/舒适布局自适应，并支持上下滚动
+- 支持点击列表行主体区域直接复制并粘贴，功能按钮不会误触发复制
+- 支持更醒目的红色删除按钮，常用操作更直观
+- 底部快捷键提示与关闭按钮采用同一行左右布局
 - 支持首次使用引导页
 - 支持更强的键盘导航与快捷操作：搜索、上下选择、回车粘贴、删除、快捷切换标签
 - 支持开机启动
@@ -71,7 +75,11 @@ It runs fully locally on your Mac.
 - Supports checkbox-based automatic cleanup policy for old backups
 - Supports one-click opening of local data, backup, and payload directories
 - Supports light / dark / follow-system appearance, panel size, list density, and accent color customization
+- Light mode now uses a cleaner pure-white background, and the top area is no longer transparent
 - Settings overlays and secondary popups adapt to panel size and density, with vertical scrolling support
+- Supports clicking the main body of a row to copy/paste directly, while action buttons do not trigger accidental copying
+- Supports a more visible red delete button for faster removal
+- Footer hints and the close button now share a left-right single-line layout
 - Supports a first-run onboarding guide
 - Supports stronger keyboard navigation and shortcuts for search, selection, paste, delete, and tab switching
 - Supports launch at login
