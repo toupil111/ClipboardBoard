@@ -337,7 +337,7 @@ struct ClipboardPanelView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("粘贴板")
                     .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(primaryTextColor)
 
                 if let lastMessage = transferService.lastMessage {
                     Text(lastMessage)
@@ -368,6 +368,16 @@ struct ClipboardPanelView: View {
                 controlBar
             }
         }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 14)
+        .background(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .fill(topContainerBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        .stroke(containerStrokeColor, lineWidth: 1)
+                )
+        )
     }
 
     private var controlBar: some View {
@@ -388,7 +398,7 @@ struct ClipboardPanelView: View {
                 Label("导入", systemImage: "square.and.arrow.down")
             }
             .buttonStyle(.borderless)
-            .foregroundStyle(.white.opacity(0.88))
+            .foregroundStyle(primaryTextColor.opacity(0.88))
 
             Button {
                 exportIncludesSensitive = true
@@ -400,13 +410,13 @@ struct ClipboardPanelView: View {
                 Label("导出", systemImage: "square.and.arrow.up")
             }
             .buttonStyle(.borderless)
-            .foregroundStyle(.white.opacity(0.88))
+            .foregroundStyle(primaryTextColor.opacity(0.88))
 
             Button {
                 isShowingSettingsSheet = true
             } label: {
                 Label("设置", systemImage: "gearshape.fill")
-                    .foregroundStyle(.white.opacity(0.88))
+                    .foregroundStyle(primaryTextColor.opacity(0.88))
             }
             .buttonStyle(.borderless)
 
@@ -416,9 +426,13 @@ struct ClipboardPanelView: View {
                 ZStack {
                     Circle()
                         .fill(blackScreenService.isInstalled ? preferencesStore.accentColor.opacity(0.88) : .white.opacity(0.12))
+                        .overlay(
+                            Circle()
+                                .stroke(containerStrokeColor, lineWidth: blackScreenService.isInstalled ? 0 : 1)
+                        )
                     Text("B")
                         .font(.system(size: 12, weight: .black))
-                        .foregroundStyle(blackScreenService.isInstalled ? Color.black.opacity(0.82) : .white.opacity(0.42))
+                        .foregroundStyle(blackScreenService.isInstalled ? Color.black.opacity(0.82) : primaryTextColor.opacity(0.42))
                 }
                 .frame(width: 28, height: 28)
             }
@@ -443,20 +457,20 @@ struct ClipboardPanelView: View {
 
                             Text("\(count(for: tab))")
                                 .font(.system(size: 12, weight: .bold))
-                                .foregroundStyle(selectedTab == tab ? Color.black.opacity(0.72) : .white.opacity(0.72))
+                                .foregroundStyle(selectedTab == tab ? Color.black.opacity(0.72) : secondaryTextColor)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 3)
                                 .background(
                                     Capsule(style: .continuous)
-                                        .fill(selectedTab == tab ? .white.opacity(0.85) : .white.opacity(0.08))
+                                        .fill(selectedTab == tab ? Color.white.opacity(0.9) : chipBackgroundColor)
                                 )
                         }
-                        .foregroundStyle(selectedTab == tab ? Color.black.opacity(0.82) : .white.opacity(0.88))
+                        .foregroundStyle(selectedTab == tab ? Color.black.opacity(0.82) : primaryTextColor.opacity(0.88))
                         .padding(.horizontal, 14)
                         .padding(.vertical, 10)
                         .background(
                             Capsule(style: .continuous)
-                                .fill(selectedTab == tab ? .white : .white.opacity(0.08))
+                                .fill(selectedTab == tab ? Color.white : chipBackgroundColor)
                         )
                     }
                     .buttonStyle(.plain)
@@ -472,12 +486,12 @@ struct ClipboardPanelView: View {
                 } label: {
                     Label("新标签", systemImage: "plus")
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(.white.opacity(0.88))
+                        .foregroundStyle(primaryTextColor.opacity(0.88))
                         .padding(.horizontal, 14)
                         .padding(.vertical, 10)
                         .background(
                             Capsule(style: .continuous)
-                                .fill(.white.opacity(0.08))
+                                .fill(chipBackgroundColor)
                         )
                 }
                 .buttonStyle(.plain)
@@ -489,11 +503,11 @@ struct ClipboardPanelView: View {
     private var searchBar: some View {
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
-                .foregroundStyle(.white.opacity(0.6))
+                .foregroundStyle(secondaryTextColor)
 
             TextField("搜索标题、内容、标签或文件名", text: $searchText)
                 .textFieldStyle(.plain)
-                .foregroundStyle(.white)
+                .foregroundStyle(primaryTextColor)
                 .focused($isSearchFieldFocused)
 
             if !searchText.isEmpty {
@@ -501,7 +515,7 @@ struct ClipboardPanelView: View {
                     searchText = ""
                 } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(.white.opacity(0.6))
+                        .foregroundStyle(secondaryTextColor)
                 }
                 .buttonStyle(.plain)
             }
@@ -510,24 +524,32 @@ struct ClipboardPanelView: View {
         .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(.white.opacity(0.08))
+                .fill(surfaceColor)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(containerStrokeColor, lineWidth: 1)
+                )
         )
     }
 
     private var tagComposer: some View {
         HStack(spacing: 10) {
             Image(systemName: "tag.fill")
-                .foregroundStyle(.white.opacity(0.65))
+                .foregroundStyle(secondaryTextColor)
 
             TextField("输入新的标签分组，例如：工作邮箱 / 家庭账号", text: $pendingTagName)
                 .textFieldStyle(.plain)
                 .font(.callout)
-                .foregroundStyle(.white)
+                .foregroundStyle(primaryTextColor)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
                 .background(
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(.white.opacity(0.08))
+                        .fill(surfaceColor)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .stroke(containerStrokeColor, lineWidth: 1)
+                        )
                 )
 
             Button("添加") {
@@ -543,7 +565,7 @@ struct ClipboardPanelView: View {
                 }
             }
             .buttonStyle(.plain)
-            .foregroundStyle(.white.opacity(0.74))
+            .foregroundStyle(primaryTextColor.opacity(0.74))
         }
     }
 
@@ -551,37 +573,42 @@ struct ClipboardPanelView: View {
         VStack(spacing: 14) {
             Image(systemName: selectedTab.symbolName)
                 .font(.system(size: 28, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.65))
+                .foregroundStyle(secondaryTextColor)
 
             Text(emptyTitle)
                 .font(.headline)
-                .foregroundStyle(.white)
+                .foregroundStyle(primaryTextColor)
 
             Text(emptyMessage)
                 .font(.callout)
-                .foregroundStyle(.white.opacity(0.64))
+                .foregroundStyle(secondaryTextColor)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 60)
         .background(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(.white.opacity(0.06))
+                .fill(surfaceColor)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .stroke(containerStrokeColor, lineWidth: 1)
+                )
         )
     }
 
     private var footer: some View {
-        VStack(spacing: 10) {
-            HStack(spacing: 14) {
+        HStack(alignment: .center, spacing: 16) {
+            VStack(alignment: .leading, spacing: 4) {
                 Label("Option + Command + V 唤醒", systemImage: "keyboard")
                     .font(.callout)
-                    .foregroundStyle(.white.opacity(0.7))
+                    .foregroundStyle(primaryTextColor.opacity(0.76))
 
-                Label("↑↓ 选择 · Enter 粘贴 · ⌘F 搜索 · Esc 关闭", systemImage: "command")
+                Text("↑↓ 选择 · Enter 粘贴 · ⌘F 搜索 · Esc 关闭")
                     .font(.caption)
-                    .foregroundStyle(.white.opacity(0.54))
+                    .foregroundStyle(secondaryTextColor)
             }
-            .frame(maxWidth: .infinity, alignment: .center)
+
+            Spacer(minLength: 20)
 
             Button("关闭") {
                 onClose()
@@ -593,13 +620,17 @@ struct ClipboardPanelView: View {
     }
 
     private var panelBackground: some View {
-        LinearGradient(
-            colors: preferencesStore.appearanceMode == .light
-            ? [Color(red: 0.95, green: 0.96, blue: 0.98), Color(red: 0.9, green: 0.92, blue: 0.96)]
-            : [Color(red: 0.12, green: 0.14, blue: 0.2), Color(red: 0.08, green: 0.09, blue: 0.14)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
+        Group {
+            if isLightAppearance {
+                Color.white
+            } else {
+                LinearGradient(
+                    colors: [Color(red: 0.12, green: 0.14, blue: 0.2), Color(red: 0.08, green: 0.09, blue: 0.14)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            }
+        }
     }
 
     private var exportOverlay: some View {
@@ -956,10 +987,10 @@ struct ClipboardPanelView: View {
             .padding(.vertical, overlayVerticalInset)
             .background(
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(.ultraThinMaterial)
+                    .fill(overlayBackgroundColor)
                     .overlay(
                         RoundedRectangle(cornerRadius: 24, style: .continuous)
-                            .stroke(.white.opacity(0.12), lineWidth: 1)
+                            .stroke(containerStrokeColor, lineWidth: 1)
                     )
             )
             .shadow(color: .black.opacity(0.3), radius: 24, y: 16)
@@ -1014,10 +1045,10 @@ struct ClipboardPanelView: View {
             .padding(.vertical, overlayVerticalInset)
             .background(
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(.ultraThinMaterial)
+                    .fill(overlayBackgroundColor)
                     .overlay(
                         RoundedRectangle(cornerRadius: 24, style: .continuous)
-                            .stroke(.white.opacity(0.12), lineWidth: 1)
+                            .stroke(containerStrokeColor, lineWidth: 1)
                     )
             )
             .shadow(color: .black.opacity(0.3), radius: 24, y: 16)
@@ -1138,7 +1169,7 @@ struct ClipboardPanelView: View {
     }
 
     private var overlayVerticalInset: CGFloat {
-        max(24, preferencesStore.panelSizePreset.size.height * 0.07)
+        max(30, preferencesStore.panelSizePreset.size.height * 0.08)
     }
 
     private var overlayContentPadding: CGFloat {
@@ -1146,7 +1177,7 @@ struct ClipboardPanelView: View {
     }
 
     private var primaryOverlayWidth: CGFloat {
-        min(max(preferencesStore.panelSizePreset.size.width - 120, 420), 620)
+        min(max(preferencesStore.panelSizePreset.size.width - 180, 360), 500)
     }
 
     private var primaryOverlayMaxHeight: CGFloat {
@@ -1154,7 +1185,7 @@ struct ClipboardPanelView: View {
     }
 
     private var secondaryOverlayWidth: CGFloat {
-        min(max(primaryOverlayWidth - 80, 320), 500)
+        min(max(primaryOverlayWidth - 56, 300), 420)
     }
 
     private var secondaryOverlayMaxHeight: CGFloat {
@@ -1426,17 +1457,51 @@ struct ClipboardPanelView: View {
             .frame(width: 460)
             .background(
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(.ultraThinMaterial)
+                    .fill(overlayBackgroundColor)
                     .overlay(
                         RoundedRectangle(cornerRadius: 24, style: .continuous)
-                            .stroke(.white.opacity(0.12), lineWidth: 1)
+                            .stroke(containerStrokeColor, lineWidth: 1)
                     )
             )
         }
     }
+
+    private var isLightAppearance: Bool {
+        preferencesStore.appearanceMode == .light
+    }
+
+    private var primaryTextColor: Color {
+        isLightAppearance ? Color.black.opacity(0.86) : Color.white
+    }
+
+    private var secondaryTextColor: Color {
+        isLightAppearance ? Color.black.opacity(0.58) : Color.white.opacity(0.62)
+    }
+
+    private var surfaceColor: Color {
+        isLightAppearance ? Color.black.opacity(0.03) : Color.white.opacity(0.08)
+    }
+
+    private var topContainerBackground: Color {
+        isLightAppearance ? Color.white : Color.white.opacity(0.06)
+    }
+
+    private var chipBackgroundColor: Color {
+        isLightAppearance ? Color.black.opacity(0.05) : Color.white.opacity(0.08)
+    }
+
+    private var overlayBackgroundColor: Color {
+        isLightAppearance ? Color.white : Color(red: 0.13, green: 0.15, blue: 0.21)
+    }
+
+    private var containerStrokeColor: Color {
+        isLightAppearance ? Color.black.opacity(0.08) : Color.white.opacity(0.12)
+    }
 }
 
 private struct ClipboardRowView: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     let item: ClipboardItem
     let availableTags: [String]
     let isSensitiveRevealed: Bool
@@ -1460,91 +1525,92 @@ private struct ClipboardRowView: View {
     var body: some View {
         HStack(alignment: .top, spacing: 14) {
             Button(action: action) {
-                preview
-            }
-            .buttonStyle(.plain)
+                HStack(alignment: .top, spacing: 14) {
+                    preview
 
-            VStack(alignment: .leading, spacing: density == .compact ? 5 : 7) {
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text(highlightedText(item.title))
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                        .lineLimit(1)
+                    VStack(alignment: .leading, spacing: density == .compact ? 5 : 7) {
+                        HStack(alignment: .firstTextBaseline, spacing: 8) {
+                            Text(highlightedText(item.title))
+                                .font(.headline)
+                                .foregroundStyle(primaryTextColor)
+                                .lineLimit(1)
 
-                    if item.isPinned {
-                        Label("置顶", systemImage: "pin.fill")
-                            .font(.caption2)
-                            .foregroundStyle(.orange.opacity(0.95))
-                    }
-
-                    if item.isSensitive {
-                        Label("敏感", systemImage: "lock.fill")
-                            .font(.caption2)
-                            .foregroundStyle(.red.opacity(0.95))
-                    }
-
-                    if item.isLargeAttachment(thresholdMB: largeAttachmentThresholdMB) {
-                        Label("大附件", systemImage: "exclamationmark.triangle.fill")
-                            .font(.caption2)
-                            .foregroundStyle(.red.opacity(0.95))
-                    }
-
-                    if item.hasCustomSensitiveTimeout {
-                        Label("独立超时", systemImage: "timer")
-                            .font(.caption2)
-                            .foregroundStyle(.purple.opacity(0.95))
-                    }
-
-                    Spacer(minLength: 10)
-
-                    Text(item.timestamp, style: .time)
-                        .font(.caption2)
-                        .foregroundStyle(.white.opacity(0.5))
-                }
-
-                HStack(spacing: 8) {
-                    Text(highlightedText(item.subtitle))
-                        .font(.subheadline)
-                        .foregroundStyle(.white.opacity(0.72))
-                        .lineLimit(1)
-
-                    if let label = item.detectedLabel {
-                        Label(label.title, systemImage: label.symbolName)
-                            .font(.caption2)
-                            .foregroundStyle(.green.opacity(0.95))
-                    }
-                }
-
-                if !item.displayTags.isEmpty {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 6) {
-                            ForEach(item.displayTags, id: \.self) { tag in
-                                Text(tag)
+                            if item.isPinned {
+                                Label("置顶", systemImage: "pin.fill")
                                     .font(.caption2)
-                                    .foregroundStyle(.cyan.opacity(0.95))
-                                    .lineLimit(1)
+                                    .foregroundStyle(.orange.opacity(0.95))
                             }
+
+                            if item.isSensitive {
+                                Label("敏感", systemImage: "lock.fill")
+                                    .font(.caption2)
+                                    .foregroundStyle(.red.opacity(0.95))
+                            }
+
+                            if item.isLargeAttachment(thresholdMB: largeAttachmentThresholdMB) {
+                                Label("大附件", systemImage: "exclamationmark.triangle.fill")
+                                    .font(.caption2)
+                                    .foregroundStyle(.red.opacity(0.95))
+                            }
+
+                            if item.hasCustomSensitiveTimeout {
+                                Label("独立超时", systemImage: "timer")
+                                    .font(.caption2)
+                                    .foregroundStyle(.purple.opacity(0.95))
+                            }
+
+                            Spacer(minLength: 10)
+
+                            Text(item.timestamp, style: .time)
+                                .font(.caption2)
+                                .foregroundStyle(secondaryTextColor)
+                        }
+
+                        HStack(spacing: 8) {
+                            Text(highlightedText(item.subtitle))
+                                .font(.subheadline)
+                                .foregroundStyle(secondaryTextColor)
+                                .lineLimit(1)
+
+                            if let label = item.detectedLabel {
+                                Label(label.title, systemImage: label.symbolName)
+                                    .font(.caption2)
+                                    .foregroundStyle(.green.opacity(0.95))
+                            }
+                        }
+
+                        if !item.displayTags.isEmpty {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 6) {
+                                    ForEach(item.displayTags, id: \.self) { tag in
+                                        Text(tag)
+                                            .font(.caption2)
+                                            .foregroundStyle(.cyan.opacity(0.95))
+                                            .lineLimit(1)
+                                    }
+                                }
+                            }
+                        }
+
+                        if let previewText = displayPreviewText {
+                            Text(highlightedText(previewText))
+                                .font(.caption)
+                                .foregroundStyle(secondaryTextColor)
+                                .lineLimit(1)
+                                .multilineTextAlignment(.leading)
+                        }
+
+                        if item.isSensitive && !isSensitiveRevealed {
+                            Text("验证后查看部分内容")
+                                .font(.caption2)
+                                .foregroundStyle(.red.opacity(0.92))
                         }
                     }
                 }
-
-                if let previewText = displayPreviewText {
-                    Text(highlightedText(previewText))
-                        .font(.caption)
-                        .foregroundStyle(.white.opacity(0.62))
-                        .lineLimit(1)
-                        .multilineTextAlignment(.leading)
-                }
-
-                if item.isSensitive && !isSensitiveRevealed {
-                    Button("验证后查看部分内容") {
-                        onRevealSensitive()
-                    }
-                    .buttonStyle(.plain)
-                    .font(.caption2)
-                    .foregroundStyle(.red.opacity(0.92))
-                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
 
             Spacer(minLength: 0)
 
@@ -1552,11 +1618,11 @@ private struct ClipboardRowView: View {
                 Button(action: onPinToggle) {
                     Image(systemName: item.isPinned ? "pin.fill" : "pin")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(item.isPinned ? .orange : .white.opacity(0.62))
+                        .foregroundStyle(item.isPinned ? .orange : secondaryTextColor)
                         .frame(width: 34, height: 34)
                         .background(
                             Circle()
-                                .fill(item.isPinned ? .orange.opacity(0.18) : .white.opacity(0.08))
+                            .fill(item.isPinned ? .orange.opacity(0.18) : surfaceColor)
                         )
                 }
                 .buttonStyle(.plain)
@@ -1564,11 +1630,11 @@ private struct ClipboardRowView: View {
                 Button(action: onFavoriteToggle) {
                     Image(systemName: item.isFavorite ? "star.fill" : "star")
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(item.isFavorite ? .yellow : .white.opacity(0.62))
+                        .foregroundStyle(item.isFavorite ? .yellow : secondaryTextColor)
                         .frame(width: 34, height: 34)
                         .background(
                             Circle()
-                                .fill(item.isFavorite ? .yellow.opacity(0.18) : .white.opacity(0.08))
+                            .fill(item.isFavorite ? .yellow.opacity(0.18) : surfaceColor)
                         )
                 }
                 .buttonStyle(.plain)
@@ -1576,11 +1642,23 @@ private struct ClipboardRowView: View {
                 Button(action: onSensitiveToggle) {
                     Image(systemName: item.isSensitive ? "lock.shield.fill" : "lock.shield")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(item.isSensitive ? .red : .white.opacity(0.62))
+                        .foregroundStyle(item.isSensitive ? .red : secondaryTextColor)
                         .frame(width: 34, height: 34)
                         .background(
                             Circle()
-                                .fill(item.isSensitive ? .red.opacity(0.18) : .white.opacity(0.08))
+                            .fill(item.isSensitive ? .red.opacity(0.18) : surfaceColor)
+                        )
+                }
+                .buttonStyle(.plain)
+
+                Button(action: onDelete) {
+                    Image(systemName: "trash")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(.red.opacity(0.95))
+                        .frame(width: 34, height: 34)
+                        .background(
+                            Circle()
+                                .fill(.red.opacity(0.16))
                         )
                 }
                 .buttonStyle(.plain)
@@ -1624,11 +1702,11 @@ private struct ClipboardRowView: View {
                 } label: {
                     Image(systemName: "ellipsis.circle")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(.white.opacity(0.72))
+                        .foregroundStyle(secondaryTextColor)
                         .frame(width: 34, height: 34)
                         .background(
                             Circle()
-                                .fill(.white.opacity(0.08))
+                            .fill(surfaceColor)
                         )
                 }
                 .menuStyle(.borderlessButton)
@@ -1639,10 +1717,10 @@ private struct ClipboardRowView: View {
         .padding(.vertical, density == .compact ? 10 : 12)
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(.white.opacity(isSelected ? 0.18 : (isHovering ? 0.14 : 0.08)))
+                .fill(rowBackgroundColor)
                 .overlay(
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .stroke(isSelected ? Color.accentColor.opacity(0.9) : .white.opacity(isHovering ? 0.18 : 0.08), lineWidth: isSelected ? 1.4 : 1)
+                        .stroke(isSelected ? Color.accentColor.opacity(0.9) : rowStrokeColor, lineWidth: isSelected ? 1.4 : 1)
                 )
         )
         .scaleEffect(isHovering || isSelected ? 1.01 : 1)
@@ -1663,11 +1741,11 @@ private struct ClipboardRowView: View {
         } else {
             ZStack {
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(.white.opacity(0.1))
+                    .fill(surfaceColor)
 
                 Image(systemName: item.contentKind.symbolName)
                     .font(.system(size: 18, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.9))
+                    .foregroundStyle(primaryTextColor.opacity(0.9))
             }
             .frame(width: density == .compact ? 42 : 48, height: density == .compact ? 42 : 48)
         }
@@ -1702,6 +1780,33 @@ private struct ClipboardRowView: View {
         }
 
         return attributed
+    }
+
+    private var isLightAppearance: Bool {
+        colorScheme == .light
+    }
+
+    private var primaryTextColor: Color {
+        isLightAppearance ? Color.black.opacity(0.86) : Color.white
+    }
+
+    private var secondaryTextColor: Color {
+        isLightAppearance ? Color.black.opacity(0.56) : Color.white.opacity(0.62)
+    }
+
+    private var surfaceColor: Color {
+        isLightAppearance ? Color.black.opacity(0.04) : Color.white.opacity(0.08)
+    }
+
+    private var rowBackgroundColor: Color {
+        if isLightAppearance {
+            return isSelected ? Color.black.opacity(0.08) : (isHovering ? Color.black.opacity(0.06) : Color.black.opacity(0.035))
+        }
+        return Color.white.opacity(isSelected ? 0.18 : (isHovering ? 0.14 : 0.08))
+    }
+
+    private var rowStrokeColor: Color {
+        isLightAppearance ? Color.black.opacity(isHovering ? 0.12 : 0.06) : Color.white.opacity(isHovering ? 0.18 : 0.08)
     }
 }
 
